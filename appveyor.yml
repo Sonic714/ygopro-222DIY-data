@@ -70,6 +70,7 @@ after_build:
   - start WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
   - WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
   
+  # finish
   - cd ..
 
 test: off
