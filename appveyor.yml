@@ -52,7 +52,7 @@ after_build:
   - cd ..
   
   # start server
-  - start ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt
+  - start bash -c "ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt"
   
   # windbot
   - git clone https://github.com/pureroesefallen/windbot --depth=1
