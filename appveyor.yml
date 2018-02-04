@@ -52,7 +52,7 @@ after_build:
   - cd ..
   
   # start server
-  - start bash -c "ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt ; exit 0"
+  - start bash -c "./ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt ; exit 0"
   
   # windbot
   - git clone https://github.com/purerosefallen/windbot --depth=1
@@ -65,11 +65,11 @@ after_build:
   
   # merge database
   - cp -rf ../cards.cdb .
-  - bash -c "sqlite3.exe ../expansions/222DIY.cdb .dump | sqlite3.exe cards.cdb ; exit 0"
+  - bash -c "./sqlite3.exe ../expansions/222DIY.cdb .dump | ./sqlite3.exe cards.cdb ; exit 0"
   
   # create deck
-  - bash -c "echo \"select id from datas;\" | sqlite3.exe ../expansions/222DIY.cdb > Decks/AI_Test.ydk ; exit 0"
-  - bash -c "echo !side >> Decks/AI_Test.ydk ; exit 0"
+  - bash -c "echo \"select id from datas;\" | ./sqlite3.exe ../expansions/222DIY.cdb > Decks/AI_Test.ydk ; exit 0"
+  - bash -c "echo !side >> ./Decks/AI_Test.ydk ; exit 0"
   
   # build windbot
   - msbuild /property:Configuration=Release
