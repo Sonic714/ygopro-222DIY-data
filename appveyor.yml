@@ -1,0 +1,91 @@
+version: '{build}'
+shallow_clone: true
+
+install:
+  - git clone https://github.com/purerosefallen/ygopro-222DIY --depth=1
+  - cp -rf ygopro-222DIY/* .
+
+  # environment and system dependency
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/premake/premake-core/releases/download/v5.0.0-alpha10/premake-5.0.0-alpha10-windows.zip ; exit 0"
+  - 7z x premake-5.0.0-alpha10-windows.zip
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz ; exit 0"
+  - tar xf libevent-2.0.22-stable.tar.gz
+  - move libevent-2.0.22-stable event
+  - xcopy /E event\WIN32-Code event\include
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.lua.org/ftp/lua-5.3.4.tar.gz ; exit 0"
+  - tar xf lua-5.3.4.tar.gz
+  - move lua-5.3.4\src lua
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://www.sqlite.org/2017/sqlite-amalgamation-3210000.zip ; exit 0"
+  - 7z x sqlite-amalgamation-3210000.zip
+  - move sqlite-amalgamation-3210000 sqlite3
+  
+  - appveyor DownloadFile https://github.com/tronkko/dirent/raw/master/include/dirent.h
+  - move dirent.h gframe\
+
+  # let premake happy
+  - xcopy /E premake\* .
+  
+  # patch lua
+  # - patch -p0 < lua\lua.patch
+    
+  # premake
+  - premake5 vs2015
+  
+configuration: Release
+
+build: 
+    project: build/ygo.sln
+    parallel: true
+
+after_build:
+  - mv -f bin/release/ygopro.exe .
+  - mkdir replay
+  
+  - git clone https://github.com/Fluorohydride/ygopro-scripts script --depth=1
+  - cd script
+  - bash -c "echo :q | git pull https://github.com/Smile-DK/ygopro-scripts master ; exit 0"
+  - cd ..
+ 
+  - start ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt
+
+  - git clone https://github.com/pureroesefallen/windbot --depth=1
+  - cd windbot
+  
+  - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://sqlite.org/2017/sqlite-tools-win32-x86-3210000.zip ; exit 0"
+  - 7z x sqlite-tools-win32-x86-3210000.zip
+  - mv sqlite-tools-win32-x86-3210000/sqlite3.exe .
+
+  - cp -rf ../cards.cdb .
+  - bash -c "sqlite3.exe ../expansions/222DIY.cdb .dump | sqlite3.exe cards.cdb ; exit 0"
+
+  - bash -c "echo \"select id from datas;\" | sqlite3.exe ../expansions/222DIY.cdb > Decks/AI_Test.ydk ; exit 0"
+  - bash -c "echo !side >> Decks/AI_Test.ydk ; exit 0"
+  
+  - msbuild /property:Configuration=Release
+  - cp -rf bin/Release/WindBot.exe .
+  
+  - start WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
+  - WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
+  
+  - cd ..
+
+test: off
+
+artifacts:
+  - path: redtexts.txt
+    name: redtexts
+
+cache:
+  - premake-5.0.0-alpha12-windows.zip
+  - libevent-2.0.22-stable.tar.gz
+  - freetype-2.8.tar.bz2
+  - irrlicht-1.8.4.zip
+  - lua-5.3.4.tar.gz
+  - sqlite-amalgamation-3210000.zip
+  - irrKlang-32bit-1.5.0.zip
+  - premake-5.0.0-alpha10-windows.zip
+  - Redis-x64-3.2.100.zip
+
