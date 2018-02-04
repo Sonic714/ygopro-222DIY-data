@@ -41,32 +41,41 @@ build:
     parallel: true
 
 after_build:
+  # pre
   - mv -f bin/release/ygopro.exe .
   - mkdir replay
-  
+
+  # scripts
   - git clone https://github.com/Fluorohydride/ygopro-scripts script --depth=1
   - cd script
   - bash -c "echo :q | git pull https://github.com/Smile-DK/ygopro-scripts master ; exit 0"
   - cd ..
- 
+  
+  # start server
   - start ygopro.exe 222 -1 2 1 F T F 1 5 1 0 0 >& redtexts.txt
-
+  
+  # windbot
   - git clone https://github.com/pureroesefallen/windbot --depth=1
   - cd windbot
   
+  # sqlite3
   - bash -c "curl --retry 5 --connect-timeout 30 --location --remote-header-name --remote-name https://sqlite.org/2017/sqlite-tools-win32-x86-3210000.zip ; exit 0"
   - 7z x sqlite-tools-win32-x86-3210000.zip
   - mv sqlite-tools-win32-x86-3210000/sqlite3.exe .
-
+  
+  # merge database
   - cp -rf ../cards.cdb .
   - bash -c "sqlite3.exe ../expansions/222DIY.cdb .dump | sqlite3.exe cards.cdb ; exit 0"
-
+  
+  # create deck
   - bash -c "echo \"select id from datas;\" | sqlite3.exe ../expansions/222DIY.cdb > Decks/AI_Test.ydk ; exit 0"
   - bash -c "echo !side >> Decks/AI_Test.ydk ; exit 0"
   
+  # build windbot
   - msbuild /property:Configuration=Release
   - cp -rf bin/Release/WindBot.exe .
   
+  # start windbot
   - start WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
   - WindBot.exe Host=127.0.0.1 Port=222 Deck=Test
   
